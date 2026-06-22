@@ -122,23 +122,20 @@ class IndegoCalendarCard extends HTMLElement {
     }
 
     setConfig(config) {
-        if (!config.entity) {
-          throw new Error(this.t('entity_required'));
-        }
-
         this.config = {
-          ...config,
-          title: config.title ?? null,
-          day_color: config.day_color ?? "#007a3d",
-          highlight_today: config.highlight_today ?? false,
-          today_border_color: config.today_border_color ?? "#ffd700",
-          slot_color: config.slot_color ?? "#007a3d",
-          now_color: config.now_color ?? "#a6ce39",
-          day_text_color: config.day_text_color ?? "#ffffff",
-          weather_exclusion_color: config.weather_exclusion_color ?? "rgba(80, 160, 255, 0.35)",
-          show_weather_exclusions: config.show_weather_exclusions ?? true,
-          show_next_mow: config.show_next_mow ?? true,
-          show_legend: config.show_legend ?? true,
+            ...config,
+            entity: config.entity ?? null,
+            title: config.title ?? null,
+            day_color: config.day_color ?? "#007a3d",
+            highlight_today: config.highlight_today ?? false,
+            today_border_color: config.today_border_color ?? "#ffd700",
+            slot_color: config.slot_color ?? "#007a3d",
+            now_color: config.now_color ?? "#a6ce39",
+            day_text_color: config.day_text_color ?? "#ffffff",
+            weather_exclusion_color: config.weather_exclusion_color ?? "rgba(80, 160, 255, 0.35)",
+            show_weather_exclusions: config.show_weather_exclusions ?? true,
+            show_next_mow: config.show_next_mow ?? true,
+            show_legend: config.show_legend ?? true,
         };
     }
 

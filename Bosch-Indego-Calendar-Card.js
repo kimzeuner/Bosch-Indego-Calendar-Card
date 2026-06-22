@@ -147,7 +147,37 @@ class IndegoCalendarCard extends HTMLElement {
     set hass(hass) {
       this._hass = hass;
 
-      const entity = hass.states[this.config.entity];
+        let entity = hass.states[this.config.entity];
+        
+        if (!entity) {
+            const fallbackEntityId = Object.keys(hass.states).find((entityId) => {
+                const a = hass.states[entityId].attributes || {};
+        
+                const hasCalendarSlots =
+                    a.monday_slot_1 !== undefined &&
+                    a.tuesday_slot_1 !== undefined &&
+                    a.wednesday_slot_1 !== undefined &&
+                    a.thursday_slot_1 !== undefined &&
+                    a.friday_slot_1 !== undefined &&
+                    a.saturday_slot_1 !== undefined &&
+                    a.sunday_slot_1 !== undefined;
+        
+                const hasPredictiveSchedule =
+                    a.schedule_monday !== undefined &&
+                    a.schedule_tuesday !== undefined &&
+                    a.schedule_wednesday !== undefined &&
+                    a.schedule_thursday !== undefined &&
+                    a.schedule_friday !== undefined &&
+                    a.schedule_saturday !== undefined &&
+                    a.schedule_sunday !== undefined;
+        
+                return hasCalendarSlots || hasPredictiveSchedule;
+            });
+        
+            if (fallbackEntityId) {
+                entity = hass.states[fallbackEntityId];
+            }
+        }
 
       if (!entity) {
 

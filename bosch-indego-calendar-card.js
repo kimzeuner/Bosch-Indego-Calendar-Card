@@ -136,10 +136,40 @@ class IndegoCalendarCard extends HTMLElement {
 
         const attr = entity.attributes;
 
-        const slotHtml = (slot) => {
-        if (!slot || slot === 'not_enabled') return '';
+        const normalizeSlots = (value) => {
+        if (!value || value === 'not_enabled' || value === 'not_scheduled' || value === 'none') {
+            return [];
+        }
 
-        const [start, end] = slot.split('-');
+        return String(value)
+            .split(',')
+            .map((slot) => slot.trim())
+            .filter((slot) =>
+                slot &&
+                slot !== 'not_enabled' &&
+                slot !== 'not_scheduled' &&
+                slot !== 'none'
+            );
+        };
+
+        const getSlotsForDay = (day) => {
+        const predictiveSchedule = attr[`schedule_${day}`];
+
+        if (predictiveSchedule !== undefined) {
+            return normalizeSlots(predictiveSchedule);
+        }
+
+        return [
+            ...normalizeSlots(attr[`${day}_slot_1`]),
+            ...normalizeSlots(attr[`${day}_slot_2`]),
+        ];
+        };
+
+        const slotHtml = (slot) => {
+        if (!slot || !slot.includes('-')) return '';
+
+        const [start, end] = slot.split('-').map((part) => part.trim());
+
         const [sh, sm] = start.split(':').map(Number);
         const [eh, em] = end.split(':').map(Number);
 
@@ -228,8 +258,7 @@ class IndegoCalendarCard extends HTMLElement {
                     <div class="line" style="left:50%;"></div>
                     <div class="line" style="left:75%;"></div>
 
-                    ${slotHtml(attr[`${day}_slot_1`])}
-                    ${slotHtml(attr[`${day}_slot_2`])}
+                    ${getSlotsForDay(day).map(slot => slotHtml(slot)).join('')}
                     ${todayLine(day)}
                 </div>
 
@@ -397,15 +426,25 @@ class IndegoCalendarCardEditor extends HTMLElement {
     .filter(([entityId, state]) => {
         const a = state.attributes || {};
 
-        return (
+        const hasCalendarSlots =
         a.monday_slot_1 !== undefined &&
         a.tuesday_slot_1 !== undefined &&
         a.wednesday_slot_1 !== undefined &&
         a.thursday_slot_1 !== undefined &&
         a.friday_slot_1 !== undefined &&
         a.saturday_slot_1 !== undefined &&
-        a.sunday_slot_1 !== undefined
-        );
+        a.sunday_slot_1 !== undefined;
+
+        const hasPredictiveSchedule =
+        a.schedule_monday !== undefined &&
+        a.schedule_tuesday !== undefined &&
+        a.schedule_wednesday !== undefined &&
+        a.schedule_thursday !== undefined &&
+        a.schedule_friday !== undefined &&
+        a.schedule_saturday !== undefined &&
+        a.schedule_sunday !== undefined;
+
+        return hasCalendarSlots || hasPredictiveSchedule;
     })
     .map(([entityId, state]) => ({
         value: entityId,

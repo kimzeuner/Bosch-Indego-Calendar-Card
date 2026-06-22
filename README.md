@@ -49,9 +49,7 @@ monday_slot_2: 14:00-16:00
 
 ```yaml
 schedule_monday: 08:00-11:00, 12:00-20:00
-
 exclusion_monday_weather: 05:00-08:00
-
 next_mow_slot: Monday 08:00-11:00
 ```
 
@@ -116,26 +114,17 @@ entity: sensor.indego_calendar_slots
 
 ```yaml
 type: custom:indego-calendar-card
-
 entity: sensor.indego_predictive_schedule
-
 title: SmartMowing Calendar
-
 highlight_today: true
-
 show_weather_exclusions: true
 show_next_mow: true
 show_legend: true
-
 day_color: var(--primary-color)
 day_text_color: white
-
 slot_color: "#007a3d"
-
 weather_exclusion_color: rgba(80,160,255,0.35)
-
 now_color: orange
-
 today_border_color: gold
 ```
 
@@ -166,25 +155,20 @@ The card supports all common CSS color formats:
 
 ```yaml
 day_color: blue
-
 day_color: "#007a3d"
-
 day_color: rgb(0,122,61)
-
 day_color: rgba(0,122,61,0.5)
-
 day_color: var(--primary-color)
-
 day_color: primary-color
-
 day_color: --primary-color
 ```
 
 ---
 
-## Screenshots
+## Screenshot
 
 Example:
+![Bosch Indego Calendar Card](images/example_predictive_full.png)
 
 - Weekly mowing schedule
 - Current time indicator

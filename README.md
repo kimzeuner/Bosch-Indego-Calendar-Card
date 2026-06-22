@@ -6,19 +6,23 @@ The card supports both the classic Indego calendar entities and the SmartMowing 
 
 ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Custom%20Card-blue)
 ![Bosch Indego](https://img.shields.io/badge/Bosch-Indego-green)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/)
 
 ---
 
 ## Features
 
 - Weekly mowing schedule visualization
-- Supports classic calendar entities
+- Supports Indego `*_calendar_slots` entity
+- Support Indego `*_predictive_schedule`entity
 - Supports SmartMowing predictive schedule entities
 - Multiple mowing windows per day
 - Current time indicator
 - Optional highlight of today's row
-- Weather exclusion visualization
+- Weather exclusion visualization with striped overlay
+- Tooltips for mowing windows and weather exclusions
 - Next mowing slot subtitle
+- Automatic next mowing slot detection
 - Built-in legend
 - Built-in Lovelace visual editor
 - English and German localization

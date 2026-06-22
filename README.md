@@ -1,11 +1,11 @@
 # Bosch Indego Calendar Card
+![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Custom%20Card-blue)
+![Bosch Indego](https://img.shields.io/badge/Bosch-Indego-green)
 
 A custom Home Assistant Lovelace card that displays Bosch Indego mowing schedules as a weekly calendar.
 
 The card visualizes the configured mowing windows for each day of the week and provides a clear timeline view from 00:00 to 24:00.
 
-![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Custom%20Card-blue)
-![Bosch Indego](https://img.shields.io/badge/Bosch-Indego-green)
 
 ## Features
 

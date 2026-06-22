@@ -183,7 +183,7 @@ Example SmartMowing Schedule:
 
 Tested with:
 
-- Home Assistant 2025.x
+- Home Assistant 2026.6.x
 - Bosch Indego Integration
 
 ---

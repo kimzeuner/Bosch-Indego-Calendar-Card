@@ -576,7 +576,7 @@ class IndegoCalendarCard extends HTMLElement {
 
     static getStubConfig() {
         return {
-            entity: 'sensor.indego_calendar_slots',
+            entity: null,
             title: null,
             highlight_today: false,
             today_border_color: "#ffd700",
@@ -647,8 +647,6 @@ class IndegoCalendarCardEditor extends HTMLElement {
       show_legend: this._config.show_legend ?? true,
       show_weather_exclusions: this._config.show_weather_exclusions ?? true,
       weather_exclusion_color: this._config.weather_exclusion_color ?? "rgba(80, 160, 255, 0.35)",
-      show_next_mow: this._config.show_next_mow ?? true,
-      show_legend: this._config.show_legend ?? true,
 
     };
 

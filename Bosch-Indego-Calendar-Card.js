@@ -203,23 +203,7 @@ class IndegoCalendarCard extends HTMLElement {
           this.config.title ||
           this.t('title');
 
-      const subtitle = (() => {
-        if (!this.config.show_next_mow) return '';
-
-      const nextMowSlot = attr.next_mow_slot;
-      const nextMowDay = attr.next_mow_day;
-      const nextMowTime = attr.next_mow_time;
-
-      if (nextMowSlot) {
-          return `${this.t('subtitle_next_mow')}: ${nextMowSlot}`;
-      }
-
-      if (nextMowDay && nextMowTime) {
-          return `${this.t('subtitle_next_mow')}: ${this.t(nextMowDay)} ${nextMowTime}`;
-      }
-
-      return '';
-    })();
+    
 
       const isToday = (day) => {
       const weekday = IndegoCalendarCard.DAYS[
@@ -257,6 +241,58 @@ class IndegoCalendarCard extends HTMLElement {
           ...normalizeSlots(attr[`${day}_slot_2`]),
       ];
       };
+
+    const getNextSlotFromCalendar = () => {
+        const now = new Date();
+        const todayIndex = (now.getDay() + 6) % 7;
+        const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    
+        for (let offset = 0; offset < 7; offset++) {
+            const dayIndex = (todayIndex + offset) % 7;
+            const day = IndegoCalendarCard.DAYS[dayIndex];
+            const slots = getSlotsForDay(day);
+    
+            for (const slot of slots) {
+                if (!slot || !slot.includes('-')) continue;
+    
+                const [start] = slot.split('-').map((part) => part.trim());
+                const [sh, sm] = start.split(':').map(Number);
+                const startMinutes = sh * 60 + sm;
+    
+                if (offset === 0 && startMinutes <= nowMinutes) {
+                    continue;
+                }
+    
+                return `${this.t(day)} ${slot}`;
+            }
+        }
+    
+        return '';
+    };
+
+    const subtitle = (() => {
+            if (!this.config.show_next_mow) return '';
+        
+            const nextMowSlot = attr.next_mow_slot;
+            const nextMowDay = attr.next_mow_day;
+            const nextMowTime = attr.next_mow_time;
+        
+            if (nextMowSlot) {
+                return `${this.t('subtitle_next_mow')}: ${nextMowSlot}`;
+            }
+        
+            if (nextMowDay && nextMowTime) {
+                return `${this.t('subtitle_next_mow')}: ${this.t(nextMowDay)} ${nextMowTime}`;
+            }
+        
+            const calculatedNextSlot = getNextSlotFromCalendar();
+        
+            if (calculatedNextSlot) {
+                return `${this.t('subtitle_next_mow')}: ${calculatedNextSlot}`;
+            }
+        
+            return '';
+        })();
 
       const getWeatherExclusionsForDay = (day) => {
           return normalizeSlots(attr[`exclusion_${day}_weather`]);

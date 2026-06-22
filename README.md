@@ -167,7 +167,8 @@ day_color: --primary-color
 
 ## Screenshot
 
-Example:
+Example SmartMowing Schedule:
+
 ![Bosch Indego Calendar Card](images/example_predictive_full.png)
 
 - Weekly mowing schedule

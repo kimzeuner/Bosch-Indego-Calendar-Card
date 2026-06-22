@@ -147,7 +147,8 @@ class IndegoCalendarCard extends HTMLElement {
     set hass(hass) {
       this._hass = hass;
 
-        let entity = hass.states[this.config.entity];
+        let entityId = this.config.entity;
+        let entity = hass.states[entityId];
         
         if (!entity) {
             const fallbackEntityId = Object.keys(hass.states).find((entityId) => {
@@ -175,6 +176,7 @@ class IndegoCalendarCard extends HTMLElement {
             });
         
             if (fallbackEntityId) {
+                entityId = fallbackEntityId;
                 entity = hass.states[fallbackEntityId];
             }
         }
@@ -683,14 +685,15 @@ class IndegoCalendarCardEditor extends HTMLElement {
     }));
 
     // AUTO SELECT
-    if (!this._config.entity && calendarEntities.length === 1) {
-    this._config = {
-        ...this._config,
-        entity: calendarEntities[0].value,
-    };
-
-    form.data = this._config;
+    if (!this._config.entity && calendarEntities.length > 0) {
+        this._config = {
+            ...this._config,
+            entity: calendarEntities[0].value,
+        };
+    
+        form.data = this._config;
     }
+      
 form.schema = [
   {
     name: "entity",

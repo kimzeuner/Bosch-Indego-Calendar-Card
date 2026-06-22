@@ -182,8 +182,8 @@ making it easy to see when the Bosch Indego mower is scheduled to operate.
 
 Tested with:
 
-- Home Assistant 2025.x
-- Bosch Indego Integration
+- Home Assistant 2026.6.x
+- [Bosch Indego Lawnmower Integration](https://github.com/WhyLev/Indego)
 
 ---
 

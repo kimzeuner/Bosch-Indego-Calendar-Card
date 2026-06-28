@@ -1,38 +1,36 @@
 # Bosch Indego Calendar Card
 
-A custom Home Assistant Lovelace card for visualizing Bosch Indego mowing schedules as a weekly calendar.
+> A custom Home Assistant Lovelace card for visualizing Bosch Indego mowing schedules as a weekly calendar.
 
-The card supports both the classic Indego calendar entities and the SmartMowing predictive schedule entities.
+[![Bosch Indego](https://img.shields.io/badge/Bosch-Indego-green?style=for-the-badge)](https://github.com/sander1988/indego)
+![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Custom%20Card-blue?style=for-the-badge&logo=home-assistant)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange?style=for-the-badge)](https://hacs.xyz/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.me/KZeuner)
 
-![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Custom%20Card-blue)
-![Bosch Indego](https://img.shields.io/badge/Bosch-Indego-green)
-[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/)
+---
+
+## Overview
+
+Supports both the classic Indego `*_calendar_slots` entities and the SmartMowing `*_predictive_schedule` entities.
+Fully theme-aware, localized in English and German, and comes with a built-in Lovelace visual editor.
+
+![Example SmartMowing Schedule](images/example_predictive_full.png)
 
 ---
 
 ## Features
 
-- Weekly mowing schedule visualization
-- Supports Indego `*_calendar_slots` entity
-- Support Indego `*_predictive_schedule`entity
-- Supports SmartMowing predictive schedule entities
-- Multiple mowing windows per day
-- Current time indicator
-- Optional highlight of today's row
-- Weather exclusion visualization with striped overlay
-- Tooltips for mowing windows and weather exclusions
-- Next mowing slot subtitle
-- Automatic next mowing slot detection
-- Built-in legend
-- Built-in Lovelace visual editor
-- English and German localization
-- Theme-aware colors
-- Supports:
-  - CSS color names
-  - HEX colors
-  - RGB/RGBA
-  - Theme variables (`var(--primary-color)`)
-  - Theme variable shorthand (`primary-color`)
+- **Weekly schedule grid** — multiple mowing windows per day
+- **SmartMowing support** — predictive schedule + weather exclusion overlay
+- **Current time indicator** — always know where you are in the week
+- **Today highlight** — optional colored border on the current day row
+- **Next mow subtitle** — automatic detection of the upcoming mowing slot
+- **Tooltips** — on mowing windows and weather exclusions
+- **Built-in legend** — color key rendered directly in the card
+- **Visual editor** — configure without writing YAML
+- **Localization** — English and German
+- **Flexible color input** — CSS names, HEX, RGB/RGBA, theme variables
 
 ---
 
@@ -41,76 +39,52 @@ The card supports both the classic Indego calendar entities and the SmartMowing 
 ### Calendar Slots
 
 ```yaml
-monday_slot_1: 08:00-12:00
-monday_slot_2: 14:00-16:00
+monday_slot_1: 08:00–12:00
+monday_slot_2: 14:00–16:00
 ```
 
 ### SmartMowing Predictive Schedule
 
 ```yaml
-schedule_monday: 08:00-11:00, 12:00-20:00
-exclusion_monday_weather: 05:00-08:00
-next_mow_slot: Monday 08:00-11:00
+schedule_monday: 08:00–11:00, 12:00–20:00
+exclusion_monday_weather: 05:00–08:00
+next_mow_slot: Monday 08:00–11:00
 ```
 
 ---
 
 ## Installation
 
-### HACS (Custom Repository)
+### Via HACS (Recommended)
 
-1. Open HACS
-2. Select **Custom Repositories**
-3. Add:
+1. Open **HACS** → **Frontend**
+2. Click the three-dot menu → **Custom Repositories**
+3. Add repository: https://github.com/kimzeuner/Bosch-Indego-Calendar-Card
+Category: **Dashboard**
+4. Install **Bosch Indego Calendar Card**
+5. Hard-refresh your browser (`Ctrl+Shift+R`)
 
-```
-https://github.com/kimzeuner/Bosch-Indego-Calendar-Card
-```
+### Manual
 
-4. Category:
-
-```
-Dashboard
-```
-
-5. Install
-6. Refresh your browser
-
----
-
-### Manual Installation
-
-Copy:
-
-```
-indego-calendar-card.js
-```
-
-to:
-
-```
-/config/www/indego-calendar-card.js
-```
-
-Add a dashboard resource:
-
+1. Copy `indego-calendar-card.js` to `/config/www/`
+2. Add a dashboard resource:
 ```yaml
-url: /local/indego-calendar-card.js
-type: module
+   url: /local/indego-calendar-card.js
+   type: module
 ```
 
 ---
 
-## Basic Configuration
+## Configuration
+
+### Minimal
 
 ```yaml
 type: custom:indego-calendar-card
 entity: sensor.indego_calendar_slots
 ```
 
----
-
-## Full Example
+### Full Example
 
 ```yaml
 type: custom:indego-calendar-card
@@ -123,83 +97,55 @@ show_legend: true
 day_color: var(--primary-color)
 day_text_color: white
 slot_color: "#007a3d"
-weather_exclusion_color: rgba(80,160,255,0.35)
+weather_exclusion_color: rgba(80, 160, 255, 0.35)
 now_color: orange
 today_border_color: gold
 ```
 
----
-
-## Configuration Options
+### Options
 
 | Option | Default | Description |
-|----------|----------|----------|
-| entity | required | Calendar entity |
-| title | Calendar | Card title |
-| day_color | #007a3d | Day label background |
-| day_text_color | #ffffff | Day label text color |
-| slot_color | #007a3d | Mowing window color |
-| weather_exclusion_color | rgba(80,160,255,0.35) | Weather exclusion color |
-| now_color | #a6ce39 | Current time indicator color |
-| today_border_color | #ffd700 | Highlight color for current day |
-| highlight_today | false | Highlight current day |
-| show_weather_exclusions | true | Show weather exclusions |
-| show_next_mow | true | Show next mowing slot subtitle |
-| show_legend | true | Show legend |
+|---|---|---|
+| `entity` | **required** | Calendar or predictive schedule entity |
+| `title` | `Calendar` | Card title |
+| `day_color` | `#007a3d` | Day label background color |
+| `day_text_color` | `#ffffff` | Day label text color |
+| `slot_color` | `#007a3d` | Mowing window fill color |
+| `weather_exclusion_color` | `rgba(80,160,255,0.35)` | Weather exclusion overlay color |
+| `now_color` | `#a6ce39` | Current time indicator color |
+| `today_border_color` | `#ffd700` | Border color for the current day |
+| `highlight_today` | `false` | Highlight the current day row |
+| `show_weather_exclusions` | `true` | Show weather exclusion overlays |
+| `show_next_mow` | `true` | Show next mowing slot subtitle |
+| `show_legend` | `true` | Show the built-in legend |
 
 ---
 
 ## Color Formats
 
-The card supports all common CSS color formats:
+All standard CSS color formats are supported, including Home Assistant theme variables:
 
 ```yaml
 day_color: blue
 day_color: "#007a3d"
-day_color: rgb(0,122,61)
-day_color: rgba(0,122,61,0.5)
+day_color: rgb(0, 122, 61)
+day_color: rgba(0, 122, 61, 0.5)
 day_color: var(--primary-color)
-day_color: primary-color
-day_color: --primary-color
+day_color: primary-color       # shorthand — resolved automatically
+day_color: --primary-color     # also valid
 ```
-
----
-
-## Screenshot
-
-Example SmartMowing Schedule:
-
-![Bosch Indego Calendar Card](images/example_predictive_full.png)
-
-- Weekly mowing schedule
-- Current time indicator
-- Weather exclusions
-- Next mowing slot information
-- Legend
 
 ---
 
 ## Compatibility
 
-Tested with:
-
-- Home Assistant 2026.6.x
-- Bosch Indego Integration
-
----
-
-## Support this project ❤️
-
-If this project saves you time or is useful to you, you can support its development:
-
-[![Donate via PayPal](https://img.shields.io/badge/Donate-PayPal-00457C?logo=paypal&logoColor=white)](https://www.paypal.me/KZeuner)
-
-Thank you very much! 😊
+| Component | Version |
+|---|---|
+| Home Assistant | 2026.6.x |
+| Bosch Indego Integration | latest |
 
 ---
 
 ## License
 
-MIT
-
----
+Released under the [MIT License](LICENSE).

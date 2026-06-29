@@ -19,7 +19,7 @@ A custom Home Assistant Lovelace card for visualizing Bosch Indego mowing schedu
 [![Bosch Indego](https://img.shields.io/badge/Bosch-Indego-green?style=for-the-badge)](https://github.com/sander1988/indego)
 ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Custom%20Card-blue?style=for-the-badge&logo=home-assistant)
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange?style=for-the-badge)](https://hacs.xyz/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/github/license/kimzeuner/Bosch-Indego-Calendar-Card?style=for-the-badge)](https://github.com/kimzeuner/Bosch-Indego-Calendar-Card/blob/main/LICENSE)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.me/KZeuner)
 
 ---

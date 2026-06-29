@@ -1,9 +1,9 @@
 import { DEFAULT_CONFIG, getCalendarEntities } from "./helpers.js";
-import { translate } from "./translations.js";
+import { getTranslations, t } from "./translations.js";
 
 class IndegoCalendarCardEditor extends HTMLElement {
   t(key) {
-    return translate((this._hass?.language || "en").split("-")[0], key);
+    return t(getTranslations(this._hass), key);
   }
 
   setConfig(config) {

@@ -2,7 +2,7 @@
 <tr>
 <td width="140">
 
-<img src="https://raw.githubusercontent.com/kimzeuner/Bosch-Indego-Calendar-Card/main/icon.png" width="140" alt="Bosch Indego Calendar Card">
+<img src="https://raw.githubusercontent.com/kimzeuner/Bosch-Indego-Calendar-Card/main/images/icon.png" width="140" alt="Bosch Indego Calendar Card">
 
 </td>
 <td>

@@ -1,20 +1,34 @@
+import { LitElement, html, css, unsafeCSS } from "lit";
 import {
   DAYS,
   DEFAULT_CONFIG,
-  color,
-  findCalendarEntity,
-  getNextSlotFromCalendar,
+  autoDetectCalendarEntity,
+  cssColor,
   getSlotsForDay,
   getWeatherExclusionsForDay,
-  isToday,
-  slotToPosition,
+  nextSlotFromCalendar,
+  slotPosition,
+  todayKey,
 } from "./helpers.js";
-import { styles } from "./styles.js";
-import { translate } from "./translations.js";
+import { CARD_STYLES } from "./styles.js";
+import { getTranslations, t } from "./translations.js";
 
-class IndegoCalendarCard extends HTMLElement {
-  t(key) {
-    return translate((this._hass?.language || "en").split("-")[0], key);
+export class IndegoCalendarCard extends LitElement {
+  static properties = {
+    hass: {},
+    config: { state: true },
+  };
+
+  static styles = css`
+    ${unsafeCSS(CARD_STYLES)}
+  `;
+
+  static getConfigElement() {
+    return document.createElement("indego-calendar-card-editor");
+  }
+
+  static getStubConfig() {
+    return { ...DEFAULT_CONFIG };
   }
 
   setConfig(config) {
@@ -26,47 +40,54 @@ class IndegoCalendarCard extends HTMLElement {
     };
   }
 
-  set hass(hass) {
-    this._hass = hass;
+  getCardSize() {
+    return 4;
+  }
 
-    const { entity } = findCalendarEntity(hass, this.config.entity);
+  getColors() {
+    return {
+      day: cssColor(this.config.day_color, DEFAULT_CONFIG.day_color),
+      slot: cssColor(this.config.slot_color, DEFAULT_CONFIG.slot_color),
+      now: cssColor(this.config.now_color, DEFAULT_CONFIG.now_color),
+      todayBorder: cssColor(
+        this.config.today_border_color,
+        DEFAULT_CONFIG.today_border_color
+      ),
+      dayText: cssColor(this.config.day_text_color, DEFAULT_CONFIG.day_text_color),
+      weatherExclusion: cssColor(
+        this.config.weather_exclusion_color,
+        DEFAULT_CONFIG.weather_exclusion_color
+      ),
+    };
+  }
+
+  render() {
+    if (!this.hass || !this.config) return html``;
+
+    const translations = getTranslations(this.hass);
+    const entityId = autoDetectCalendarEntity(this.hass, this.config.entity);
+    const entity = entityId ? this.hass.states[entityId] : undefined;
 
     if (!entity) {
-      this.innerHTML = `
+      return html`
         <ha-card>
-          <div style="padding:16px;">
-            ${this.t("entity_not_found")}: ${this.config.entity}
+          <div class="card">
+            ${t(translations, "entity_not_found")}: ${this.config.entity || ""}
           </div>
         </ha-card>
       `;
-      return;
     }
 
-    const dayColor = color(this.config.day_color, DEFAULT_CONFIG.day_color);
-    const slotColor = color(this.config.slot_color, DEFAULT_CONFIG.slot_color);
-    const nowColor = color(this.config.now_color, DEFAULT_CONFIG.now_color);
-    const todayBorderColor = color(
-      this.config.today_border_color,
-      DEFAULT_CONFIG.today_border_color,
-    );
-    const dayTextColor = color(
-      this.config.day_text_color,
-      DEFAULT_CONFIG.day_text_color,
-    );
-    const weatherExclusionColor = color(
-      this.config.weather_exclusion_color,
-      DEFAULT_CONFIG.weather_exclusion_color,
-    );
+    const colors = this.getColors();
+    const attributes = entity.attributes;
+    const title = this.config.title || t(translations, "title");
+    const subtitle = this.renderSubtitle(translations, attributes);
 
-    const attr = entity.attributes;
-    const title = this.config.title || this.t("title");
-    const subtitle = this.renderSubtitle(attr);
-
-    this.innerHTML = `
+    return html`
       <ha-card>
         <div class="card">
           <div class="title">${title}</div>
-          ${subtitle ? `<div class="subtitle">${subtitle}</div>` : ""}
+          ${subtitle ? html`<div class="subtitle">${subtitle}</div>` : html``}
 
           <div class="scale">
             <div></div>
@@ -79,79 +100,53 @@ class IndegoCalendarCard extends HTMLElement {
             </div>
           </div>
 
-          ${DAYS.map((day) =>
-            this.renderDayRow({
-              day,
-              attr,
-              dayColor,
-              dayTextColor,
-              slotColor,
-              nowColor,
-              todayBorderColor,
-              weatherExclusionColor,
-            }),
-          ).join("")}
-
-          ${this.config.show_legend
-            ? this.renderLegend(slotColor, weatherExclusionColor, nowColor)
-            : ""}
+          ${DAYS.map((day) => this.renderDayRow(translations, attributes, day, colors))}
+          ${this.config.show_legend ? this.renderLegend(translations, colors) : html``}
         </div>
       </ha-card>
-
-      ${styles}
     `;
   }
 
-  renderSubtitle(attr) {
+  renderSubtitle(translations, attributes) {
     if (!this.config.show_next_mow) return "";
 
-    const nextMowSlot = attr.next_mow_slot;
-    const nextMowDay = attr.next_mow_day;
-    const nextMowTime = attr.next_mow_time;
-
-    if (nextMowSlot) {
-      return `${this.t("subtitle_next_mow")}: ${nextMowSlot}`;
+    if (attributes.next_mow_slot) {
+      return `${t(translations, "subtitle_next_mow")}: ${attributes.next_mow_slot}`;
     }
 
-    if (nextMowDay && nextMowTime) {
-      return `${this.t("subtitle_next_mow")}: ${this.t(nextMowDay)} ${nextMowTime}`;
+    if (attributes.next_mow_day && attributes.next_mow_time) {
+      return `${t(translations, "subtitle_next_mow")}: ${t(
+        translations,
+        attributes.next_mow_day
+      )} ${attributes.next_mow_time}`;
     }
 
-    const calculatedNextSlot = getNextSlotFromCalendar(attr);
+    const nextSlot = nextSlotFromCalendar(attributes);
 
-    if (calculatedNextSlot) {
-      return `${this.t("subtitle_next_mow")}: ${this.t(calculatedNextSlot.day)} ${calculatedNextSlot.slot}`;
-    }
+    if (!nextSlot) return "";
 
-    return "";
+    return `${t(translations, "subtitle_next_mow")}: ${t(
+      translations,
+      nextSlot.day
+    )} ${nextSlot.slot}`;
   }
 
-  renderDayRow({
-    day,
-    attr,
-    dayColor,
-    dayTextColor,
-    slotColor,
-    nowColor,
-    todayBorderColor,
-    weatherExclusionColor,
-  }) {
-    const today = isToday(day);
-    const highlighted = this.config.highlight_today && today;
+  renderDayRow(translations, attributes, day, colors) {
+    const highlighted = this.config.highlight_today && day === todayKey();
 
-    return `
+    return html`
       <div class="row">
         <div
           class="day"
-          style="background:${dayColor}; color:${dayTextColor};"
+          style="background:${colors.day}; color:${colors.dayText};"
         >
-          ${this.t(day)}
+          ${t(translations, day)}
         </div>
 
         <div
           class="track"
           style="
-            border-color:${highlighted ? todayBorderColor : "var(--divider-color)"};
+            border-color:${highlighted ? colors.todayBorder : "var(--divider-color)"};
             border-width:${highlighted ? "2px" : "1px"};
           "
         >
@@ -159,110 +154,94 @@ class IndegoCalendarCard extends HTMLElement {
           <div class="line" style="left:50%;"></div>
           <div class="line" style="left:75%;"></div>
 
-          ${getSlotsForDay(attr, day)
-            .map((slot) => this.renderSlot(slot, slotColor))
-            .join("")}
-
+          ${getSlotsForDay(attributes, day).map((slot) =>
+            this.renderSlot(translations, slot, colors.slot)
+          )}
           ${this.config.show_weather_exclusions
-            ? getWeatherExclusionsForDay(attr, day)
-                .map((slot) =>
-                  this.renderWeatherExclusion(slot, weatherExclusionColor),
-                )
-                .join("")
-            : ""}
-
-          ${this.renderTodayLine(day, nowColor)}
+            ? getWeatherExclusionsForDay(attributes, day).map((slot) =>
+                this.renderWeatherExclusion(translations, slot, colors.weatherExclusion)
+              )
+            : html``}
+          ${this.renderNowLine(day, colors.now)}
         </div>
       </div>
     `;
   }
 
-  renderSlot(slot, slotColor) {
-    const position = slotToPosition(slot);
-    if (!position) return "";
+  renderSlot(translations, slot, color) {
+    const position = slotPosition(slot);
+    if (!position) return html``;
 
-    return `
+    return html`
       <div
         class="slot"
-        title="${this.t("tooltip_mowing")}: ${slot}"
+        title="${t(translations, "tooltip_mowing")}: ${slot}"
         style="
           left:${position.left}%;
           width:${position.width}%;
-          background:${slotColor};
+          background:${color};
         "
       ></div>
     `;
   }
 
-  renderWeatherExclusion(slot, weatherExclusionColor) {
-    const position = slotToPosition(slot);
-    if (!position) return "";
+  renderWeatherExclusion(translations, slot, color) {
+    const position = slotPosition(slot);
+    if (!position) return html``;
 
-    return `
+    return html`
       <div
         class="weather-exclusion"
-        title="${this.t("tooltip_weather")}: ${slot}"
+        title="${t(translations, "tooltip_weather")}: ${slot}"
         style="
           left:${position.left}%;
           width:${position.width}%;
-          background-color:${weatherExclusionColor};
+          background-color:${color};
         "
       ></div>
     `;
   }
 
-  renderTodayLine(day, nowColor) {
-    const weekday = DAYS[(new Date().getDay() + 6) % 7];
-
-    if (day !== weekday) return "";
+  renderNowLine(day, color) {
+    if (day !== todayKey()) return html``;
 
     const now = new Date();
     const minutes = now.getHours() * 60 + now.getMinutes();
     const left = (minutes / 1440) * 100;
 
-    return `
+    return html`
       <div
         class="now-line"
-        style="left:${left}%; background:${nowColor};"
+        style="left:${left}%; background:${color};"
       ></div>
     `;
   }
 
-  renderLegend(slotColor, weatherExclusionColor, nowColor) {
-    return `
+  renderLegend(translations, colors) {
+    return html`
       <div class="legend">
         <div class="legend-item">
-          <span class="legend-box legend-slot" style="background:${slotColor};"></span>
-          <span>${this.t("legend_mowing")}</span>
+          <span class="legend-box" style="background:${colors.slot};"></span>
+          <span>${t(translations, "legend_mowing")}</span>
         </div>
 
         <div class="legend-item">
           <span
             class="legend-box legend-weather"
-            style="--weather-exclusion-color:${weatherExclusionColor};"
+            style="background-color:${colors.weatherExclusion};"
           ></span>
-          <span>${this.t("legend_weather")}</span>
+          <span>${t(translations, "legend_weather")}</span>
         </div>
 
         <div class="legend-item">
-          <span class="legend-now" style="background:${nowColor};"></span>
-          <span>${this.t("legend_now")}</span>
+          <span class="legend-now" style="background:${colors.now};"></span>
+          <span>${t(translations, "legend_now")}</span>
         </div>
       </div>
     `;
   }
-
-  getCardSize() {
-    return 4;
-  }
-
-  static getStubConfig() {
-    return { ...DEFAULT_CONFIG };
-  }
-
-  static getConfigElement() {
-    return document.createElement("indego-calendar-card-editor");
-  }
 }
 
-customElements.define("indego-calendar-card", IndegoCalendarCard);
+if (!customElements.get("indego-calendar-card")) {
+  customElements.define("indego-calendar-card", IndegoCalendarCard);
+}

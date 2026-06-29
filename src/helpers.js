@@ -23,7 +23,7 @@ export const DEFAULT_CONFIG = {
   show_legend: true,
 };
 
-export function color(value, fallback) {
+export function cssColor(value, fallback) {
   if (!value) return fallback;
 
   if (Array.isArray(value)) {
@@ -36,36 +36,21 @@ export function color(value, fallback) {
 
   if (typeof value !== "string") return fallback;
 
-  const colorValue = value.trim();
+  const color = value.trim();
 
-  if (!colorValue) return fallback;
+  if (!color) return fallback;
+  if (color.startsWith("--")) return `var(${color})`;
+  if (color.startsWith("var(")) return color;
 
-  if (colorValue.startsWith("--")) {
-    return `var(${colorValue})`;
+  if (typeof CSS !== "undefined" && CSS.supports && CSS.supports("color", color)) {
+    return color;
   }
 
-  if (colorValue.startsWith("var(")) {
-    return colorValue;
-  }
-
-  if (
-    typeof CSS !== "undefined" &&
-    CSS.supports &&
-    CSS.supports("color", colorValue)
-  ) {
-    return colorValue;
-  }
-
-  return `var(--${colorValue})`;
+  return `var(--${color})`;
 }
 
 export function normalizeSlots(value) {
-  if (
-    !value ||
-    value === "not_enabled" ||
-    value === "not_scheduled" ||
-    value === "none"
-  ) {
+  if (!value || value === "not_enabled" || value === "not_scheduled" || value === "none") {
     return [];
   }
 
@@ -77,7 +62,7 @@ export function normalizeSlots(value) {
         slot &&
         slot !== "not_enabled" &&
         slot !== "not_scheduled" &&
-        slot !== "none",
+        slot !== "none"
     );
 }
 
@@ -103,26 +88,25 @@ export function hasCalendarEntityAttributes(attributes = {}) {
   return hasCalendarSlots || hasPredictiveSchedule;
 }
 
-export function findCalendarEntity(hass, configuredEntityId) {
-  let entityId = configuredEntityId;
-  let entity = hass.states[entityId];
+export function autoDetectCalendarEntity(hass, configuredEntityId) {
+  const configuredEntity = configuredEntityId ? hass.states[configuredEntityId] : undefined;
 
-  if (entity) {
-    return { entityId, entity };
+  if (configuredEntity) {
+    return configuredEntityId;
   }
 
-  const fallbackEntityId = Object.keys(hass.states).find((candidateEntityId) =>
-    hasCalendarEntityAttributes(hass.states[candidateEntityId].attributes),
+  return Object.keys(hass.states).find((entityId) =>
+    hasCalendarEntityAttributes(hass.states[entityId].attributes)
   );
+}
 
-  if (!fallbackEntityId) {
-    return { entityId, entity: undefined };
-  }
-
-  return {
-    entityId: fallbackEntityId,
-    entity: hass.states[fallbackEntityId],
-  };
+export function calendarEntityOptions(hass) {
+  return Object.entries(hass.states)
+    .filter(([, state]) => hasCalendarEntityAttributes(state.attributes))
+    .map(([entityId, state]) => ({
+      value: entityId,
+      label: state.attributes.friendly_name || entityId,
+    }));
 }
 
 export function getSlotsForDay(attributes, day) {
@@ -142,12 +126,11 @@ export function getWeatherExclusionsForDay(attributes, day) {
   return normalizeSlots(attributes[`exclusion_${day}_weather`]);
 }
 
-export function isToday(day) {
-  const weekday = DAYS[(new Date().getDay() + 6) % 7];
-  return day === weekday;
+export function todayKey() {
+  return DAYS[(new Date().getDay() + 6) % 7];
 }
 
-export function slotToPosition(slot) {
+export function slotPosition(slot) {
   if (!slot || !slot.includes("-")) return null;
 
   const [start, end] = slot.split("-").map((part) => part.trim());
@@ -167,7 +150,7 @@ export function slotToPosition(slot) {
   };
 }
 
-export function getNextSlotFromCalendar(attributes) {
+export function nextSlotFromCalendar(attributes) {
   const now = new Date();
   const todayIndex = (now.getDay() + 6) % 7;
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
@@ -175,9 +158,8 @@ export function getNextSlotFromCalendar(attributes) {
   for (let offset = 0; offset < 7; offset += 1) {
     const dayIndex = (todayIndex + offset) % 7;
     const day = DAYS[dayIndex];
-    const slots = getSlotsForDay(attributes, day);
 
-    for (const slot of slots) {
+    for (const slot of getSlotsForDay(attributes, day)) {
       if (!slot || !slot.includes("-")) continue;
 
       const [start] = slot.split("-").map((part) => part.trim());
@@ -192,14 +174,5 @@ export function getNextSlotFromCalendar(attributes) {
     }
   }
 
-  return null;
-}
-
-export function getCalendarEntities(hass) {
-  return Object.entries(hass.states)
-    .filter(([, state]) => hasCalendarEntityAttributes(state.attributes))
-    .map(([entityId, state]) => ({
-      value: entityId,
-      label: state.attributes.friendly_name || entityId,
-    }));
+  return undefined;
 }

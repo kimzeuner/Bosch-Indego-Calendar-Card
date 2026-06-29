@@ -1,10 +1,39 @@
-import { DEFAULT_CONFIG, getCalendarEntities } from "./helpers.js";
+import { LitElement, html, css } from "lit";
+import { DEFAULT_CONFIG, calendarEntityOptions } from "./helpers.js";
 import { getTranslations, t } from "./translations.js";
 
-class IndegoCalendarCardEditor extends HTMLElement {
-  t(key) {
-    return t(getTranslations(this._hass), key);
-  }
+export class IndegoCalendarCardEditor extends LitElement {
+  static properties = {
+    hass: { attribute: false },
+    _config: { state: true },
+  };
+
+  static styles = css`
+    .editor {
+      padding: 16px;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    ha-form {
+      display: block;
+      width: 100%;
+    }
+
+    @media (max-width: 600px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+  `;
 
   setConfig(config) {
     this._config = {
@@ -13,152 +42,177 @@ class IndegoCalendarCardEditor extends HTMLElement {
       entity: config.entity ?? DEFAULT_CONFIG.entity,
       title: config.title ?? DEFAULT_CONFIG.title,
     };
-
-    if (!this._rendered) {
-      this.render();
-    } else if (this._form) {
-      this._form.data = this._config;
-    }
-  }
-
-  set hass(hass) {
-    this._hass = hass;
-
-    if (!this._rendered) {
-      this.render();
-    } else if (this._form) {
-      this._form.hass = hass;
-    }
   }
 
   render() {
-    if (!this._hass || !this._config) return;
+    if (!this.hass || !this._config) return html``;
 
-    this.innerHTML = "<ha-form></ha-form>";
+    const translations = getTranslations(this.hass);
+    const entities = calendarEntityOptions(this.hass);
 
-    const form = this.querySelector("ha-form");
-    const calendarEntities = getCalendarEntities(this._hass);
-
-    this._form = form;
-
-    form.hass = this._hass;
-    form.computeLabel = (schema) => schema.label || schema.name;
-
-    if (!this._config.entity && calendarEntities.length > 0) {
+    if (!this._config.entity && entities.length > 0) {
       this._config = {
         ...this._config,
-        entity: calendarEntities[0].value,
+        entity: entities[0].value,
       };
     }
 
-    form.data = this._config;
-    form.schema = [
-      {
-        name: "entity",
-        label: this.t("entity"),
-        required: true,
-        selector: {
-          select: {
-            mode: "dropdown",
-            options: calendarEntities,
-          },
-        },
-      },
-      {
-        name: "title",
-        label: this.t("title_field"),
-        selector: {
-          text: {},
-        },
-      },
-      {
-        type: "grid",
-        schema: [
+    return html`
+      <div class="editor">
+        <div class="field">
+          ${this.renderForm(
+            [
+              {
+                name: "entity",
+                label: t(translations, "entity"),
+                required: true,
+                selector: {
+                  select: {
+                    mode: "dropdown",
+                    options: entities,
+                  },
+                },
+              },
+              {
+                name: "title",
+                label: t(translations, "title_field"),
+                selector: {
+                  text: {},
+                },
+              },
+            ],
+            this._config
+          )}
+        </div>
+
+        <div class="field grid-2">
+          ${this.renderTextForm(
+            "day_color",
+            this._config.day_color,
+            t(translations, "day_color")
+          )}
+          ${this.renderTextForm(
+            "day_text_color",
+            this._config.day_text_color,
+            t(translations, "day_text_color")
+          )}
+        </div>
+
+        <div class="field grid-2">
+          ${this.renderTextForm(
+            "slot_color",
+            this._config.slot_color,
+            t(translations, "slot_color")
+          )}
+          ${this.renderTextForm(
+            "now_color",
+            this._config.now_color,
+            t(translations, "now_color")
+          )}
+        </div>
+
+        <div class="field">
+          ${this.renderForm(
+            [
+              {
+                name: "highlight_today",
+                label: t(translations, "highlight_today"),
+                selector: {
+                  boolean: {},
+                },
+              },
+              {
+                name: "today_border_color",
+                label: t(translations, "today_border_color"),
+                selector: {
+                  text: {},
+                },
+              },
+              {
+                name: "show_weather_exclusions",
+                label: t(translations, "show_weather_exclusions"),
+                selector: {
+                  boolean: {},
+                },
+              },
+              {
+                name: "weather_exclusion_color",
+                label: t(translations, "weather_exclusion_color"),
+                selector: {
+                  text: {},
+                },
+              },
+              {
+                name: "show_next_mow",
+                label: t(translations, "show_next_mow"),
+                selector: {
+                  boolean: {},
+                },
+              },
+              {
+                name: "show_legend",
+                label: t(translations, "show_legend"),
+                selector: {
+                  boolean: {},
+                },
+              },
+            ],
+            this._config
+          )}
+        </div>
+      </div>
+    `;
+  }
+
+  renderTextForm(key, value, label) {
+    return html`
+      ${this.renderForm(
+        [
           {
-            name: "day_color",
-            label: this.t("day_color"),
-            selector: { text: {} },
-          },
-          {
-            name: "day_text_color",
-            label: this.t("day_text_color"),
-            selector: { text: {} },
+            name: key,
+            label,
+            selector: {
+              text: {},
+            },
           },
         ],
-      },
-      {
-        type: "grid",
-        schema: [
-          {
-            name: "slot_color",
-            label: this.t("slot_color"),
-            selector: { text: {} },
-          },
-          {
-            name: "now_color",
-            label: this.t("now_color"),
-            selector: { text: {} },
-          },
-        ],
-      },
-      {
-        name: "highlight_today",
-        label: this.t("highlight_today"),
-        selector: {
-          boolean: {},
-        },
-      },
-      {
-        name: "today_border_color",
-        label: this.t("today_border_color"),
-        selector: {
-          text: {},
-        },
-      },
-      {
-        name: "show_weather_exclusions",
-        label: this.t("show_weather_exclusions"),
-        selector: {
-          boolean: {},
-        },
-      },
-      {
-        name: "weather_exclusion_color",
-        label: this.t("weather_exclusion_color"),
-        selector: {
-          text: {},
-        },
-      },
-      {
-        name: "show_next_mow",
-        label: this.t("show_next_mow"),
-        selector: {
-          boolean: {},
-        },
-      },
-      {
-        name: "show_legend",
-        label: this.t("show_legend"),
-        selector: {
-          boolean: {},
-        },
-      },
-    ];
+        { [key]: value }
+      )}
+    `;
+  }
 
-    form.addEventListener("value-changed", (ev) => {
-      this._config = ev.detail.value;
+  renderForm(schema, data) {
+    return html`
+      <ha-form
+        .hass=${this.hass}
+        .schema=${schema}
+        .data=${data}
+        .computeLabel=${(item) => item.label || item.name}
+        @value-changed=${(event) => this.handleValueChanged(event)}
+      ></ha-form>
+    `;
+  }
 
-      this.dispatchEvent(
-        new CustomEvent("config-changed", {
-          detail: { config: this._config },
-          bubbles: true,
-          composed: true,
-        }),
-      );
-    });
+  handleValueChanged(event) {
+    this.updateConfig(event.detail.value);
+  }
 
-    this._rendered = true;
+  updateConfig(changes) {
+    this._config = {
+      ...this._config,
+      ...changes,
+    };
+
+    this.dispatchEvent(
+      new CustomEvent("config-changed", {
+        detail: { config: this._config },
+        bubbles: true,
+        composed: true,
+      })
+    );
   }
 }
 
-customElements.define("indego-calendar-card-editor", IndegoCalendarCardEditor);
+if (!customElements.get("indego-calendar-card-editor")) {
+  customElements.define("indego-calendar-card-editor", IndegoCalendarCardEditor);
+}

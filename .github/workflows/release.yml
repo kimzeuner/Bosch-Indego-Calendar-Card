@@ -12,16 +12,28 @@ jobs:
   build:
     name: Build release asset
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout release source
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: npm install
-      - run: npm run lint
-      - run: npm run build
+      
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
       - name: Copy built card to root
         run: cp dist/indego-calendar-card.js indego-calendar-card.js
+  
       - name: Upload card to release
         uses: softprops/action-gh-release@v2
         with:

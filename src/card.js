@@ -29,7 +29,7 @@ class IndegoCalendarCard extends HTMLElement {
   set hass(hass) {
     this._hass = hass;
 
-    const { entityId, entity } = findCalendarEntity(hass, this.config.entity);
+    const { entity } = findCalendarEntity(hass, this.config.entity);
 
     if (!entity) {
       this.innerHTML = `

@@ -1,6 +1,14 @@
-# Bosch Indego Calendar Card
+<p align="center">
+  <img src="icon.png" width="140">
+</p>
 
-> A custom Home Assistant Lovelace card for visualizing Bosch Indego mowing schedules as a weekly calendar.
+<h1 align="center">Bosch Indego Calendar Card</h1>
+
+<p align="center">
+A custom Home Assistant Lovelace card for visualizing Bosch Indego mowing schedules as a weekly calendar.
+</p>
+
+<p align="center">
 
 [![Bosch Indego](https://img.shields.io/badge/Bosch-Indego-green?style=for-the-badge)](https://github.com/sander1988/indego)
 ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Custom%20Card-blue?style=for-the-badge&logo=home-assistant)

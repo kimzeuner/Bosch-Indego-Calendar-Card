@@ -1,14 +1,20 @@
-<p align="center">
-  <img src="icon.png" width="140">
-</p>
+<table>
+<tr>
+<td width="140">
 
-<h1 align="center">Bosch Indego Calendar Card</h1>
+<img src="icon.png" width="120">
 
-<p align="center">
+</td>
+<td>
+
+# Bosch Indego Calendar Card
+
 A custom Home Assistant Lovelace card for visualizing Bosch Indego mowing schedules as a weekly calendar.
-</p>
 
-<p align="center">
+</td>
+</tr>
+</table>
+
 
 [![Bosch Indego](https://img.shields.io/badge/Bosch-Indego-green?style=for-the-badge)](https://github.com/sander1988/indego)
 ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Custom%20Card-blue?style=for-the-badge&logo=home-assistant)
